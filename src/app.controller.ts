@@ -1,4 +1,12 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Redirect } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller()
-export class AppController {}
+export class AppController {
+  @Get('')
+  @Redirect('/api')
+  index() {
+    return;
+  }
+}
