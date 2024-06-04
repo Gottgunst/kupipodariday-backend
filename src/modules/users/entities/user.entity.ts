@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import {
+  IsDate,
   IsEmail,
   IsNumber,
   IsOptional,
@@ -8,16 +9,25 @@ import {
   IsUrl,
   Length,
 } from 'class-validator';
+import { OfferEntity } from 'src/modules/offers/entities/offer.entity';
+import {
+  WishEntity,
+  wishEntity,
+} from 'src/modules/wishes/entities/wish.entity';
+import { WishlistEntity } from 'src/modules/wishlists/entities/wishlist.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 export class UserEntity {
-  // ################################
+  // ======================================
+
   @ApiProperty({
     description: 'Идентификатор пользователя',
     example: 123,
@@ -26,7 +36,7 @@ export class UserEntity {
   @IsNumber()
   id: number;
 
-  // ################################
+  // ======================================
 
   @ApiProperty({
     description: 'Username пользователя',
@@ -35,11 +45,13 @@ export class UserEntity {
   @IsString()
   @Column({
     unique: true,
+    type: 'varchar',
+    length: 64,
   })
   @Length(1, 64)
-  username: string | null;
+  username: string;
 
-  // ################################
+  // ======================================
 
   @ApiPropertyOptional({
     description: 'Описание пользователя',
@@ -49,11 +61,13 @@ export class UserEntity {
   @IsOptional()
   @Column({
     default: 'Описание пользователя',
+    type: 'varchar',
+    length: 200,
   })
   @Length(1, 200)
   about: string;
 
-  // ################################
+  // ======================================
 
   @ApiPropertyOptional({
     description: 'Аватар пользователя',
@@ -63,10 +77,11 @@ export class UserEntity {
   @IsOptional()
   @Column({
     default: 'https://i.pravatar.cc/150?img=3',
+    type: 'text',
   })
   avatar: string;
 
-  // ################################
+  // ======================================
 
   @ApiProperty({
     description: 'Почта пользователя',
@@ -77,46 +92,73 @@ export class UserEntity {
     default: 'wisher@yandex.ru',
     unique: true,
     select: false,
+    type: 'text',
   })
   email: string;
 
-  // ################################
+  // ======================================
 
   @ApiProperty({
     description: 'Дата создания пользователя',
     example: '22.02.2022',
   })
   @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
-  // ################################
+  // ======================================
 
   @ApiProperty({
     description: 'Дата изменения данных пользователя',
     example: '24.04.2024',
   })
-  @CreateDateColumn()
-  updatedA: Date;
+  @UpdateDateColumn()
+  @IsDate()
+  updatedAt: Date;
 
-  // ################################
+  // ======================================
 
   @ApiProperty({
     description: 'Пароль пользователя',
-    example: 'qwerty12345',
+    example: 'q1w2e3r4t5y',
   })
   @IsString()
   @Exclude({})
+  @Column({ select: false, type: 'text' })
   password: string;
 
-  // ################################
+  // ======================================
 
-  // @ApiProperty({
-  //   isArray: true,
-  //   type: () => WishEntity,
-  //   default: [],
-  //   description: 'Избранные подарки',
-  // })
-  // wishes: WishEntity[];
+  @ApiProperty({
+    isArray: true,
+    type: () => WishEntity,
+    default: [],
+    description: 'Подарки',
+  })
+  @OneToMany(() => WishEntity, (wish) => wish.owner)
+  wishes: WishEntity[];
 
-  // ################################
+  // ======================================
+
+  @ApiProperty({
+    isArray: true,
+    type: () => OfferEntity,
+    default: [],
+    description: 'Складчина',
+  })
+  @OneToMany(() => OfferEntity, (offer) => offer.user)
+  offers: OfferEntity[];
+
+  // ======================================
+
+  @ApiProperty({
+    isArray: true,
+    type: () => WishlistEntity,
+    default: [],
+    description: 'Списки желаний',
+  })
+  @OneToMany(() => WishlistEntity, (wishlist) => wishlist.owner)
+  wishlists: WishlistEntity[];
+
+  // ======================================
 }
