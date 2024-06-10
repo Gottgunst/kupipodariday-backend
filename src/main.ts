@@ -1,21 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
+import { configSwagger, routeSwagger } from './config/swagger-config';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.enableCors();
+  app.use(helmet());
 
-  const config = new DocumentBuilder()
-    .setTitle('КупиПодариДай')
-    .setDescription('API сервиса вишлистов')
-    .setVersion('42.7.3')
-    .build();
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup(
+    routeSwagger,
+    app,
+    SwaggerModule.createDocument(app, configSwagger),
+  );
 
   await app.listen(3000);
 }
