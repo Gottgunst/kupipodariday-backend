@@ -8,7 +8,9 @@ import {
   IsUrl,
   Length,
 } from 'class-validator';
+import { UserPublicProfileResponseDto } from 'src/modules/users/dto/public-response-user.dto';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
+import { WishPartial } from 'src/modules/wishes/dto/response-wish.dto';
 import {
   Column,
   CreateDateColumn,
@@ -95,17 +97,18 @@ export class WishlistEntity {
 
   @ApiProperty({
     description: 'Создатель списка желаний',
-    type: () => UserEntity,
+    type: () => UserPublicProfileResponseDto,
     default: [],
   })
   @ManyToOne(() => UserEntity, (user) => user.wishlists)
   @JoinColumn()
-  owner: UserEntity;
+  owner: UserPublicProfileResponseDto;
 
   // ======================================
 
   @ApiProperty({
     isArray: true,
+    type: () => [WishPartial],
     description: 'Список желаний',
   })
   @IsArray()
@@ -113,7 +116,7 @@ export class WishlistEntity {
     type: 'simple-array',
     default: [],
   })
-  items: number[];
+  items: WishPartial[];
 
   // ======================================
 }

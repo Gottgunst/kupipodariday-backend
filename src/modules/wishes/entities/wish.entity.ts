@@ -10,6 +10,7 @@ import {
   Min,
 } from 'class-validator';
 import { OfferEntity } from 'src/modules/offers/entities/offer.entity';
+import { UserPublicProfileResponseDto } from 'src/modules/users/dto/public-response-user.dto';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import { WishlistEntity } from 'src/modules/wishlists/entities/wishlist.entity';
 import {
@@ -161,19 +162,19 @@ export class WishEntity {
   // ======================================
 
   @ApiProperty({
-    type: () => UserEntity,
+    type: () => UserPublicProfileResponseDto,
     default: [],
     description: 'Создатель желания',
   })
   @ManyToOne(() => UserEntity, (user) => user.wishes)
   @JoinColumn()
-  owner: UserEntity;
+  owner: UserPublicProfileResponseDto;
 
   // ======================================
 
   @ApiProperty({
     isArray: true,
-    type: () => OfferEntity,
+    type: () => [OfferEntity],
     default: [],
     description: 'Список складчины',
   })
@@ -184,7 +185,7 @@ export class WishEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => WishlistEntity,
+    type: () => [WishlistEntity],
     default: [],
     description: 'Списки желаний',
   })

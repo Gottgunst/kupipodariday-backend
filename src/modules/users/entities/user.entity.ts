@@ -131,7 +131,7 @@ export class UserEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => WishEntity,
+    type: () => [WishEntity],
     default: [],
     description: 'Подарки',
   })
@@ -142,7 +142,7 @@ export class UserEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => OfferEntity,
+    type: () => [OfferEntity],
     default: [],
     description: 'Складчина',
   })
@@ -153,7 +153,7 @@ export class UserEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => WishlistEntity,
+    type: () => [WishlistEntity],
     default: [],
     description: 'Списки желаний',
   })
