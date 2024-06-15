@@ -1,7 +1,4 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
-// import { UserEntity } from 'src/modules/users/entities/user.entity';
-
-// class UserAuthResponseDto extends PickType(UserEntity, ['id', 'email']) {}
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SignInUserResponseDto {
   // @ApiProperty({
@@ -9,10 +6,10 @@ export class SignInUserResponseDto {
   //   type: () => UserAuthResponseDto,
   // })
   // user: {
-  //   id: UserEntity['id'];
+  //   id: UserId;
   //   email: UserEntity['email'];
   // };
 
   @ApiProperty({ description: 'Access token', example: 'Bearer <JWT Token>' })
-  accessToken: string;
+  access_token: string;
 }

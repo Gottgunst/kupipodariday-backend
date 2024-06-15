@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
@@ -9,12 +8,11 @@ import {
   IsUrl,
   Length,
 } from 'class-validator';
-import { OfferEntity } from 'src/modules/offers/entities/offer.entity';
 import {
+  OfferEntity,
   WishEntity,
-  wishEntity,
-} from 'src/modules/wishes/entities/wish.entity';
-import { WishlistEntity } from 'src/modules/wishlists/entities/wishlist.entity';
+  WishlistEntity,
+} from 'src/modules/entities.index';
 import {
   Column,
   CreateDateColumn,
@@ -23,6 +21,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+// #####################################
+// #####################################
+// #####################################
 
 @Entity()
 export class UserEntity {
@@ -123,7 +125,6 @@ export class UserEntity {
     example: 'q1w2e3r4t5y',
   })
   @IsString()
-  @Exclude({})
   @Column({ select: false, type: 'text' })
   password: string;
 

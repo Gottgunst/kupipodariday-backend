@@ -1,7 +1,7 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { WishlistEntity } from '../entities/wishlist.entity';
 import { IsArray } from 'class-validator';
-import { WishEntity } from 'src/modules/wishes/entities/wish.entity';
+import { WishId } from 'src/common/types';
 
 export class CreateWishlistDto extends PickType(WishlistEntity, [
   'name',
@@ -9,9 +9,8 @@ export class CreateWishlistDto extends PickType(WishlistEntity, [
 ] as const) {
   @ApiProperty({
     isArray: true,
-    type: () => [WishEntity['id']],
     description: 'Список Id желаний',
   })
   @IsArray()
-  itemsId: WishEntity['id'][];
+  itemsId: WishId[];
 }

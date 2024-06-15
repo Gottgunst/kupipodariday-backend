@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import {
   IsEmpty,
   IsNumber,
@@ -7,12 +6,20 @@ import {
   IsString,
   IsUrl,
   Length,
+  Max,
   Min,
 } from 'class-validator';
-import { OfferEntity } from 'src/modules/offers/entities/offer.entity';
-import { UserPublicProfileResponseDto } from 'src/modules/users/dto/public-response-user.dto';
-import { UserEntity } from 'src/modules/users/entities/user.entity';
-import { WishlistEntity } from 'src/modules/wishlists/entities/wishlist.entity';
+import { Transform } from 'class-transformer';
+import {
+  decimalTransformer,
+  roundFloatTransformer,
+} from 'src/common/entity.transformers';
+import { UserPublicProfileResponseDto } from 'src/modules/users/dto';
+import {
+  UserEntity,
+  OfferEntity,
+  WishlistEntity,
+} from 'src/modules/entities.index';
 import {
   Column,
   CreateDateColumn,
@@ -23,6 +30,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+// #####################################
+// #####################################
+// #####################################
 
 @Entity()
 export class WishEntity {
@@ -102,12 +113,13 @@ export class WishEntity {
   })
   @IsNumber()
   @Min(1)
-  // @Transform(floatRounderTransformer)
+  @Max(99999999.99)
+  @Transform(roundFloatTransformer)
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 11,
     scale: 2,
-    // transformer: decimalEntityColumnTransformer,
+    transformer: decimalTransformer,
   })
   price: number;
 
@@ -120,13 +132,14 @@ export class WishEntity {
   })
   @IsNumber()
   @Min(1)
-  // @Transform(floatRounderTransformer)
+  @Max(99999999.99)
+  @Transform(roundFloatTransformer)
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 11,
     scale: 2,
     default: 0,
-    // transformer: decimalEntityColumnTransformer,
+    transformer: decimalTransformer,
   })
   raised: number;
 

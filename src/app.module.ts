@@ -3,10 +3,10 @@ import { AppController } from './app.controller';
 import {
   UsersModule,
   WishesModule,
-  WishlistsModule,
-  OffersModule,
+  // WishlistsModule,
+  // OffersModule,
   AuthModule,
-} from './modules';
+} from './modules/modules.index';
 import { ConfigModule } from '@nestjs/config';
 import config from './config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,8 +23,8 @@ import { DbConfigFactory } from './config/db-config.factory';
     }),
     UsersModule,
     WishesModule,
-    WishlistsModule,
-    OffersModule,
+    // WishlistsModule,
+    // OffersModule,
     AuthModule,
   ],
   controllers: [AppController],
