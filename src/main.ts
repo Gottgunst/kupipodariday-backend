@@ -17,6 +17,7 @@ async function bootstrap() {
     routeSwagger,
     app,
     SwaggerModule.createDocument(app, configSwagger),
+    { swaggerOptions: { persistAuthorization: true } },
   );
 
   await app.listen(3000);

@@ -1,25 +1,59 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/signup.auth.dto';
-import { UsersService } from '../users/users.service';
+import { Body, Controller, Post, UseFilters, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { LocalAuthGuard } from './guard/local-auth.guard';
+import { UserExistExceptionFilter } from 'src/common/filters';
+import { AuthService, UsersService } from '../services.index';
+import {
+  CreateUserDto,
+  SignInUserDto,
+  SignInUserResponseDto,
+  SignUpUserResponseDto,
+} from '../users/dto';
+import { AuthUser } from 'src/common/decorators';
+import { UserEntity } from '../entities.index';
 
-@ApiTags('auth')
-@Controller()
+// #####################################
+// #####################################
+// #####################################
+
+@ApiTags('Auth')
+@Controller('auth')
+@UseFilters(UserExistExceptionFilter)
 export class AuthController {
   constructor(
-    private readonly userService: UsersService, //private readonly authService: AuthService
+    private authService: AuthService,
+    private userService: UsersService,
   ) {}
 
-  @Post('signup')
-  async createUser(@Body() CreateUserDto: CreateUserDto) {
-    // const user = await this.userService.create(CreateUserDto);
-    // return this.authService.login(user);
-  }
+  // ======================================
 
-  // ################################
-
+  @ApiOkResponse({
+    description: 'Авторизация пользователя',
+    type: () => SignInUserResponseDto,
+  })
+  @ApiBearerAuth()
+  @UseGuards(LocalAuthGuard)
   @Post('signin')
-  login(@Req() req: Request) {
-    // return this.authService.login(req.user);
+  async signIn(
+    @AuthUser() user: UserEntity,
+    @Body() auth: SignInUserDto, // eslint-disable-line
+  ): Promise<SignInUserResponseDto> {
+    return await this.authService.signIn(user);
   }
+
+  // ======================================
+
+  @ApiOkResponse({
+    description: 'Создание пользователя',
+    type: () => SignUpUserResponseDto,
+  })
+  @Post('signup')
+  async createUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<SignUpUserResponseDto> {
+    const user = await this.userService.create(createUserDto);
+    return user;
+  }
+
+  // ======================================
 }
