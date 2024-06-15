@@ -28,6 +28,20 @@ export class AuthController {
   // ======================================
 
   @ApiOkResponse({
+    description: 'Создание пользователя',
+    type: () => SignUpUserResponseDto,
+  })
+  @Post('signup')
+  async createUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<SignUpUserResponseDto> {
+    const user = await this.userService.create(createUserDto);
+    return user;
+  }
+
+  // ======================================
+
+  @ApiOkResponse({
     description: 'Авторизация пользователя',
     type: () => SignInUserResponseDto,
   })
@@ -39,20 +53,6 @@ export class AuthController {
     @Body() auth: SignInUserDto, // eslint-disable-line
   ): Promise<SignInUserResponseDto> {
     return await this.authService.signIn(user);
-  }
-
-  // ======================================
-
-  @ApiOkResponse({
-    description: 'Создание пользователя',
-    type: () => SignUpUserResponseDto,
-  })
-  @Post('signup')
-  async createUser(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<SignUpUserResponseDto> {
-    const user = await this.userService.create(createUserDto);
-    return user;
   }
 
   // ======================================

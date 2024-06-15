@@ -21,11 +21,11 @@ import { DbConfigFactory } from './config/db-config.factory';
     TypeOrmModule.forRootAsync({
       useClass: DbConfigFactory,
     }),
+    AuthModule,
     UsersModule,
     WishesModule,
     // WishlistsModule,
     // OffersModule,
-    AuthModule,
   ],
   controllers: [AppController],
   providers: [],

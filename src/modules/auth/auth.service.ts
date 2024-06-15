@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../services.index';
 import { JwtService } from '@nestjs/jwt';
 import { verifyHash } from 'src/helpers/hash';
-import { SignInUserDto, SignInUserResponseDto } from '../users/dto';
+import { SignInUserResponseDto } from '../users/dto';
 import { UserEntity } from '../entities.index';
 
 // #####################################
