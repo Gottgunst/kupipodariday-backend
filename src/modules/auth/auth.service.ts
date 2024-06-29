@@ -21,7 +21,7 @@ export class AuthService {
   async validateUser(username: string, password: string) {
     const user = await this.userService.findOne({
       where: { username },
-      select: { password: true, id: true },
+      select: ['username', 'password', 'id'],
     });
 
     if (user && (await verifyHash(password, user.password))) {
@@ -35,7 +35,6 @@ export class AuthService {
 
   async signIn(user: UserEntity): Promise<SignInUserResponseDto> {
     const { username, id: sub } = user;
-
     return {
       access_token: await this.jwtService.signAsync({ username, sub }),
     };

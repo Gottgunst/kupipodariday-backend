@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseFilters, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseFilters,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { UserExistExceptionFilter } from 'src/common/filters';
@@ -11,13 +18,14 @@ import {
 } from '../users/dto';
 import { AuthUser } from 'src/common/decorators';
 import { UserEntity } from '../entities.index';
+import { RemovePasswordInterceptor } from '../users/interceptors';
 
 // #####################################
 // #####################################
 // #####################################
 
 @ApiTags('Auth')
-@Controller('auth')
+@Controller()
 @UseFilters(UserExistExceptionFilter)
 export class AuthController {
   constructor(
@@ -32,6 +40,7 @@ export class AuthController {
     type: () => SignUpUserResponseDto,
   })
   @Post('signup')
+  @UseInterceptors(RemovePasswordInterceptor)
   async createUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<SignUpUserResponseDto> {

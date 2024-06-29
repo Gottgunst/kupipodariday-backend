@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { UsersController, UsersPublicController } from './users.controller';
+import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule, WishesModule } from '../modules.index';
@@ -11,7 +11,7 @@ import { UserEntity, WishEntity } from '../entities.index';
     forwardRef(() => AuthModule),
     forwardRef(() => WishesModule),
   ],
-  controllers: [UsersPublicController, UsersController],
+  controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
 })

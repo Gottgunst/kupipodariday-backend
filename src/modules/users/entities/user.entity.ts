@@ -93,7 +93,6 @@ export class UserEntity {
   @Column({
     default: 'wisher@yandex.ru',
     unique: true,
-    select: false,
     type: 'text',
   })
   email: string;

@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { hashValue } from 'src/helpers/hash';
 import { UserEntity, WishEntity } from '../entities.index';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, SignUpUserResponseDto, UpdateUserDto } from './dto';
 import { UserId } from 'src/common/types';
 
 // #####################################
@@ -19,7 +19,7 @@ export class UsersService {
 
   // ======================================
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async create(createUserDto: CreateUserDto): Promise<SignUpUserResponseDto> {
     const { password } = createUserDto;
     const user = await this.usersRepository.create({
       ...createUserDto,
@@ -31,7 +31,9 @@ export class UsersService {
   // ======================================
 
   findById(id: UserId): Promise<UserEntity> {
-    return this.usersRepository.findOne({ where: { id } });
+    return this.usersRepository.findOne({
+      where: { id },
+    });
   }
 
   // ======================================
@@ -42,13 +44,23 @@ export class UsersService {
 
   // ======================================
 
-  async updateOne(id: UserId, updateUserDto: UpdateUserDto) {
+  findMany(query: FindManyOptions<UserEntity>) {
+    return this.usersRepository.find(query);
+  }
+
+  // ======================================
+
+  async updateOne(
+    id: UserId,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserDto> {
     const { password } = updateUserDto;
     const user = await this.findById(id);
+    console.log(user);
     if (password) {
       updateUserDto.password = await hashValue(password);
     }
-    return await this.usersRepository.save({ ...user, ...updateUserDto });
+    return this.usersRepository.save({ ...user, ...updateUserDto });
   }
 
   // ======================================
@@ -60,21 +72,12 @@ export class UsersService {
 
   // ======================================
 
-  async findWishes(where, param): Promise<WishEntity[]> {
-    const populatedUser = await this.usersRepository
-      .createQueryBuilder('user')
-      .select('user.username')
-      .leftJoinAndSelect('user.wishes', 'wishes')
-      .leftJoinAndSelect(
-        'wishes.offers',
-        'offers',
-        'offers.hidden = :isHidden',
-        { isHidden: false },
-      )
-      .where(where, param)
-      .getOne();
-
-    if (!populatedUser) throw new NotFoundException();
+  async findWishes(property, value): Promise<WishEntity[]> {
+    const populatedUser = await this.usersRepository.findOne({
+      where: { [property]: value },
+      select: ['wishes'],
+      relations: { wishes: { offers: true } },
+    });
 
     return populatedUser.wishes;
   }

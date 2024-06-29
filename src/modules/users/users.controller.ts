@@ -10,8 +10,13 @@ import {
   Param,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AuthUser, AuthUserId } from 'src/common/decorators';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthUserId } from 'src/common/decorators';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { EntityNotFoundFilter } from 'src/common/filters';
 import { UsersService } from '../services.index';
@@ -21,45 +26,24 @@ import {
   UserProfileResponseDto,
   UserPublicProfileResponseDto,
 } from './dto';
-import { UserEntity, WishEntity } from '../entities.index';
-import { RemovePasswordInterceptor } from './interceptors';
+import { WishEntity } from '../entities.index';
+import {
+  RemoveEmailInterceptor,
+  RemoveIdInterceptor,
+  RemovePasswordInterceptor,
+} from './interceptors';
 import { UserId } from 'src/common/types';
+import { UserWishesDto } from '../wishes/dto';
 
 // #####################################
-// ############ PUBLIC #################
 // #####################################
-
-@ApiTags('Users')
-@UseFilters(EntityNotFoundFilter)
-@Controller('users')
-export class UsersPublicController {
-  constructor(private usersService: UsersService) {}
-
-  // ======================================
-
-  @ApiOkResponse({
-    description: 'Публичные данные пользователя',
-    type: UserPublicProfileResponseDto,
-  })
-  @Get(':username')
-  findByName(
-    @Param('username') username: string,
-  ): Promise<UserPublicProfileResponseDto> {
-    const user = this.usersService.findOne({ where: { username } });
-    if (user) return user;
-    throw new NotFoundException(`Пользователя нет`);
-  }
-}
-
-// #####################################
-// ########### PRIVATE #################
 // #####################################
 
 @ApiTags('Users')
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(RemovePasswordInterceptor)
 @UseFilters(EntityNotFoundFilter)
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
@@ -71,19 +55,8 @@ export class UsersController {
     type: UserProfileResponseDto,
   })
   @Get('me')
-  findSelf(@AuthUser() user: UserEntity): Promise<UserProfileResponseDto> {
-    return this.usersService.findOne({
-      where: { id: user.id },
-      select: {
-        email: true,
-        username: true,
-        id: true,
-        avatar: true,
-        about: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  findSelf(@AuthUserId() id: UserId): Promise<UserProfileResponseDto> {
+    return this.usersService.findById(id);
   }
 
   // ======================================
@@ -92,13 +65,13 @@ export class UsersController {
     description: 'Правим данные текущего пользователя',
     type: UpdateUserDto,
   })
+  @UseInterceptors(RemoveIdInterceptor)
   @Patch('me')
   async updateSelf(
-    @AuthUser() user: UserEntity,
+    @AuthUserId() id: UserId,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
-    const { id } = user;
-    return this.usersService.updateOne(id, updateUserDto);
+  ): Promise<UpdateUserDto> {
+    return await this.usersService.updateOne(id, updateUserDto);
   }
 
   // ======================================
@@ -107,31 +80,52 @@ export class UsersController {
     description: 'Массив желаний текущего пользователя',
     type: [WishEntity],
   })
-  @UseGuards(JwtAuthGuard)
   @Get('me/wishes')
   async findMyWishes(@AuthUserId() userId: UserId): Promise<WishEntity[]> {
-    return await this.usersService.findWishes('user.id = :userId', { userId });
+    return await this.usersService.findWishes('id', userId);
+  }
+
+  // ======================================
+
+  @ApiOkResponse({
+    description: 'Публичные данные пользователя',
+    type: UserPublicProfileResponseDto,
+  })
+  @ApiParam({ name: 'username', example: 'Wisher' })
+  @UseInterceptors(RemoveEmailInterceptor)
+  @Get(':username')
+  findByName(
+    @Param('username') username: string,
+  ): Promise<UserPublicProfileResponseDto> {
+    const user = this.usersService.findOne({ where: { username } });
+    if (user) return user;
+    throw new NotFoundException(`Пользователя нет`);
   }
 
   // ======================================
 
   @ApiOkResponse({
     description: 'Массив желаний указанного пользователя',
-    type: [WishEntity],
+    type: [UserWishesDto],
   })
+  @ApiParam({ name: 'username', example: 'Wisher' })
   @Get(':username/wishes')
   async findWishesById(
     @Param('username') username: string,
-  ): Promise<WishEntity[]> {
-    return await this.usersService.findWishes('user.username = :username', {
-      username,
-    });
+  ): Promise<UserWishesDto[]> {
+    return await this.usersService.findWishes('username', username);
   }
 
   // ======================================
 
-  // @Post('find')
-  // find(@Body() { query }: FindUsersDto) {
-  //   return this.usersService.findByEmailOrUsername(query);
-  // }
+  @ApiOkResponse({
+    description: 'Поиск по почте или имени пользователя',
+    type: [UserProfileResponseDto],
+  })
+  @Post('find')
+  find(@Body() { query }: FindUsersDto): Promise<UserProfileResponseDto[]> {
+    return this.usersService.findMany({
+      where: [{ email: query }, { username: query }],
+    });
+  }
 }

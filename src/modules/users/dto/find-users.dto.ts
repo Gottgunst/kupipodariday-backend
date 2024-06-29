@@ -4,7 +4,7 @@ import { IsString } from 'class-validator';
 export class FindUsersDto {
   @ApiProperty({
     description: 'username или email',
-    example: 'some@ya.ru',
+    example: 'wisher@yandex.ru',
   })
   @IsString()
   query: string;
