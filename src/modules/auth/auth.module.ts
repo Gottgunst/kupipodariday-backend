@@ -7,6 +7,7 @@ import { JwtConfigFactory } from 'src/config/jwt-config';
 import { LocalStrategy } from './strategy/local.strategy';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { UsersModule } from '../modules.index';
+import { UserOrEmailExistExceptionsFilter } from 'src/common/filters';
 
 @Module({
   imports: [
@@ -15,7 +16,13 @@ import { UsersModule } from '../modules.index';
     JwtModule.registerAsync({ useClass: JwtConfigFactory }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtConfigFactory],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtConfigFactory,
+    UserOrEmailExistExceptionsFilter,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

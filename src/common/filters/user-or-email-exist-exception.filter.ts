@@ -2,13 +2,13 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
-  HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { QueryFailedError } from 'typeorm';
 
-@Catch()
-export class AllExceptionsFilter implements ExceptionFilter {
+@Catch(QueryFailedError)
+export class UserOrEmailExistExceptionsFilter implements ExceptionFilter {
   constructor(private httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -16,21 +16,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const ctx = host.switchToHttp();
 
-    const httpStatus =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
-    const exceptionMessage =
-      exception instanceof HttpException ? exception.message : 'Ошибка сервера';
+    // ======================================
 
     const responseBody = {
-      statusCode: httpStatus,
+      message: 'Email или username уже заняты',
+      statusCode: HttpStatus.CONFLICT,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      message: exceptionMessage,
     };
 
-    httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
+    httpAdapter.reply(ctx.getResponse(), responseBody, HttpStatus.CONFLICT);
   }
 }

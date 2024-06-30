@@ -5,8 +5,6 @@ import {
   Patch,
   Body,
   UseGuards,
-  UseFilters,
-  NotFoundException,
   Param,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,7 +16,6 @@ import {
 } from '@nestjs/swagger';
 import { AuthUserId } from 'src/common/decorators';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { EntityNotFoundFilter } from 'src/common/filters';
 import { UsersService } from '../services.index';
 import {
   FindUsersDto,
@@ -40,10 +37,9 @@ import { UserWishesDto } from '../wishes/dto';
 // #####################################
 
 @ApiTags('Users')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(RemovePasswordInterceptor)
-@UseFilters(EntityNotFoundFilter)
-@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
@@ -97,9 +93,7 @@ export class UsersController {
   findByName(
     @Param('username') username: string,
   ): Promise<UserPublicProfileResponseDto> {
-    const user = this.usersService.findOne({ where: { username } });
-    if (user) return user;
-    throw new NotFoundException(`Пользователя нет`);
+    return this.usersService.findOne({ where: { username } });
   }
 
   // ======================================

@@ -5,6 +5,7 @@ import { hashValue } from 'src/helpers/hash';
 import { UserEntity, WishEntity } from '../entities.index';
 import { CreateUserDto, SignUpUserResponseDto, UpdateUserDto } from './dto';
 import { UserId } from 'src/common/types';
+import { UserNotFoundException } from './exceptions';
 
 // #####################################
 // #####################################
@@ -38,8 +39,12 @@ export class UsersService {
 
   // ======================================
 
-  findOne(query: FindOneOptions<UserEntity>) {
-    return this.usersRepository.findOne(query);
+  async findOne(query: FindOneOptions<UserEntity>) {
+    const user = await this.usersRepository.findOne(query);
+
+    this.isExist(user);
+
+    return user;
   }
 
   // ======================================
@@ -65,13 +70,6 @@ export class UsersService {
 
   // ======================================
 
-  // async removeOne(query: FindOneOptions<UserEntity>) {
-  //   const user = await this.usersRepository.findOne(query);
-  //   return await this.usersRepository.remove(user);
-  // }
-
-  // ======================================
-
   async findWishes(property, value): Promise<WishEntity[]> {
     const populatedUser = await this.usersRepository.findOne({
       where: { [property]: value },
@@ -79,6 +77,18 @@ export class UsersService {
       relations: { wishes: { offers: true } },
     });
 
+    this.isExist(populatedUser);
+
     return populatedUser.wishes;
+  }
+  // ======================================
+
+  // async removeOne(query: FindOneOptions<UserEntity>) {
+  //   const user = await this.usersRepository.findOne(query);
+  //   return await this.usersRepository.remove(user);
+  // }
+
+  private isExist(user: UserEntity | null): void {
+    if (!user) throw new UserNotFoundException();
   }
 }

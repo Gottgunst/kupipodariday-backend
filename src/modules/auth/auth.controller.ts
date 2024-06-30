@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guard/local-auth.guard';
-import { UserExistExceptionFilter } from 'src/common/filters';
 import { AuthService, UsersService } from '../services.index';
 import {
   CreateUserDto,
@@ -19,6 +18,7 @@ import {
 import { AuthUser } from 'src/common/decorators';
 import { UserEntity } from '../entities.index';
 import { RemovePasswordInterceptor } from '../users/interceptors';
+import { UserOrEmailExistExceptionsFilter } from 'src/common/filters';
 
 // #####################################
 // #####################################
@@ -26,7 +26,6 @@ import { RemovePasswordInterceptor } from '../users/interceptors';
 
 @ApiTags('Auth')
 @Controller()
-@UseFilters(UserExistExceptionFilter)
 export class AuthController {
   constructor(
     private authService: AuthService,
@@ -40,6 +39,7 @@ export class AuthController {
     type: () => SignUpUserResponseDto,
   })
   @Post('signup')
+  @UseFilters(UserOrEmailExistExceptionsFilter)
   @UseInterceptors(RemovePasswordInterceptor)
   async createUser(
     @Body() createUserDto: CreateUserDto,
