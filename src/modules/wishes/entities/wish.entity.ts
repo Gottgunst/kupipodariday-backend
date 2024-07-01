@@ -13,7 +13,7 @@ import { Transform } from 'class-transformer';
 import {
   decimalTransformer,
   roundFloatTransformer,
-} from 'src/common/entity.transformers';
+} from 'src/helpers/entity.transformers';
 import { UserPublicProfileResponseDto } from 'src/modules/users/dto';
 import {
   UserEntity,
@@ -156,6 +156,22 @@ export class WishEntity {
     default: 0,
   })
   copied: number;
+
+  // ======================================
+
+  @ApiProperty({
+    description:
+      'Идентификатор подарка с которого делали копию, если подарок уникальный, то  значение равно 0',
+    example: 0,
+  })
+  @IsNumber()
+  @Min(0)
+  @Column({
+    type: 'int',
+    default: 0,
+    select: false,
+  })
+  parentId: number;
 
   // ======================================
 
