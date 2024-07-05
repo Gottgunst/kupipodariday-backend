@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import {
   UsersModule,
   WishesModule,
-  // WishlistsModule,
-  // OffersModule,
   AuthModule,
+  OffersModule,
+  // WishlistsModule,
 } from './modules/modules.index';
 import { ConfigModule } from '@nestjs/config';
 import config from './config/config';
@@ -24,8 +24,8 @@ import { DbConfigFactory } from './config/db-config.factory';
     AuthModule,
     UsersModule,
     WishesModule,
+    OffersModule,
     // WishlistsModule,
-    // OffersModule,
   ],
   controllers: [AppController],
   providers: [],

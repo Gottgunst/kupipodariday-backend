@@ -57,7 +57,7 @@ export class OfferEntity {
   // ======================================
 
   @ApiProperty({
-    description: 'Открыта ли складчина',
+    description: 'Явное или тайное участие в складчине',
     example: false,
   })
   @IsBoolean()

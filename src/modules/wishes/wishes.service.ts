@@ -172,10 +172,10 @@ export class WishesService {
 
   // ======================================
 
-  async donate(wish: WishEntity, amount: number) {
-    wish.raised += amount;
-    return this.wishesRepository.save(wish);
-  }
+  // async donate(wish: WishEntity, amount: number) {
+  //   wish.raised += amount;
+  //   return this.wishesRepository.save(wish);
+  // }
 
   // ======================================
 
