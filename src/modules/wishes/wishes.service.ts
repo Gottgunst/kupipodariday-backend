@@ -66,11 +66,6 @@ export class WishesService {
 
     return wish;
   }
-  // ======================================
-
-  findMany(query: FindManyOptions) {
-    return this.wishesRepository.find(query);
-  }
 
   // ======================================
 
@@ -174,6 +169,19 @@ export class WishesService {
   private isOwner(wishOwnerId: UserId, userId: UserId): void {
     if (wishOwnerId !== userId) throw new UserIsNotOwnerException();
   }
+
+  // ======================================
+
+  async donate(wish: WishEntity, amount: number) {
+    wish.raised += amount;
+    return this.wishesRepository.save(wish);
+  }
+
+  // ======================================
+
+  // findMany(query: FindManyOptions) {
+  //   return this.wishesRepository.find(query);
+  // }
 
   // ======================================
 

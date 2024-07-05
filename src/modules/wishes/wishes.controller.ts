@@ -21,7 +21,7 @@ import {
 import { WishesService } from './wishes.service';
 import { CreateWishDto, UpdateWishDto } from './dto';
 import { WishEntity } from '../entities.index';
-import { FilterOffersInterceptor } from './interceptions';
+import { FilterWishOffersInterceptor } from './interceptions';
 import { UserId, WishId } from 'src/common/types';
 
 // #####################################
@@ -29,6 +29,7 @@ import { UserId, WishId } from 'src/common/types';
 // #####################################
 
 @ApiTags('Wishes')
+@UseInterceptors(FilterWishOffersInterceptor)
 @Controller('wishes')
 export class WishesPublicController {
   constructor(private wishesService: WishesService) {}
@@ -63,7 +64,7 @@ export class WishesPublicController {
 @ApiTags('Wishes')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(FilterOffersInterceptor)
+@UseInterceptors(FilterWishOffersInterceptor)
 @Controller('wishes')
 export class WishesController {
   constructor(private wishesService: WishesService) {}
@@ -93,10 +94,7 @@ export class WishesController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const wish = await this.wishesService.findOne({
       where: { id },
-      relations: {
-        owner: true,
-        offers: true,
-      },
+      relations: ['owner', 'offers'],
     });
 
     return wish;

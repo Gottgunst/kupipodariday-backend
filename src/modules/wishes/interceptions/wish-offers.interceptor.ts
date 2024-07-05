@@ -8,7 +8,7 @@ import { map } from 'rxjs';
 import { WishEntity } from '../entities/wish.entity';
 
 @Injectable()
-export class FilterOffersInterceptor implements NestInterceptor {
+export class FilterWishOffersInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler<WishEntity>) {
     const filterHiddenOffers = (wish: WishEntity) => {
       const { offers } = wish;

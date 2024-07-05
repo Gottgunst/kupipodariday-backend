@@ -27,7 +27,7 @@ export class CommonExceptionsFilter implements ExceptionFilter {
           };
         default:
           return {
-            message: 'Ошибка сервера',
+            message: 'Ошибка сервера — ' + exception.message,
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           };
       }

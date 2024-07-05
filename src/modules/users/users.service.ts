@@ -22,7 +22,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<SignUpUserResponseDto> {
     const { password } = createUserDto;
-    const user = await this.usersRepository.create({
+    const user = this.usersRepository.create({
       ...createUserDto,
       password: await hashValue(password),
     });
@@ -34,6 +34,15 @@ export class UsersService {
   findById(id: UserId): Promise<UserEntity> {
     return this.usersRepository.findOne({
       where: { id },
+      select: [
+        'id',
+        'username',
+        'about',
+        'avatar',
+        'email',
+        'createdAt',
+        'updatedAt',
+      ],
     });
   }
 
@@ -61,7 +70,7 @@ export class UsersService {
   ): Promise<UpdateUserDto> {
     const { password } = updateUserDto;
     const user = await this.findById(id);
-    console.log(user);
+
     if (password) {
       updateUserDto.password = await hashValue(password);
     }
@@ -83,12 +92,12 @@ export class UsersService {
   }
   // ======================================
 
+  private isExist(user: UserEntity | null): void {
+    if (!user) throw new UserNotFoundException();
+  }
+
   // async removeOne(query: FindOneOptions<UserEntity>) {
   //   const user = await this.usersRepository.findOne(query);
   //   return await this.usersRepository.remove(user);
   // }
-
-  private isExist(user: UserEntity | null): void {
-    if (!user) throw new UserNotFoundException();
-  }
 }

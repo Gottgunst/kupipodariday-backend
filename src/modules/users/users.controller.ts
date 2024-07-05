@@ -24,11 +24,7 @@ import {
   UserPublicProfileResponseDto,
 } from './dto';
 import { WishEntity } from '../entities.index';
-import {
-  RemoveEmailInterceptor,
-  RemoveIdInterceptor,
-  RemovePasswordInterceptor,
-} from './interceptors';
+import { RemoveIdInterceptor, RemovePasswordInterceptor } from './interceptors';
 import { UserId } from 'src/common/types';
 import { UserWishesDto } from '../wishes/dto';
 
@@ -88,7 +84,6 @@ export class UsersController {
     type: UserPublicProfileResponseDto,
   })
   @ApiParam({ name: 'username', example: 'Wisher' })
-  @UseInterceptors(RemoveEmailInterceptor)
   @Get(':username')
   findByName(
     @Param('username') username: string,

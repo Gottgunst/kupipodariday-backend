@@ -94,6 +94,7 @@ export class UserEntity {
     default: 'wisher@yandex.ru',
     unique: true,
     type: 'text',
+    select: false,
   })
   email: string;
 
