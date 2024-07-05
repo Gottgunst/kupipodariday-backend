@@ -64,7 +64,7 @@ export class UsersService {
 
   // ======================================
 
-  async updateOne(
+  async updateOneById(
     id: UserId,
     updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {

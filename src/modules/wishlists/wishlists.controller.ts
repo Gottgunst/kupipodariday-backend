@@ -18,10 +18,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { WishlistsService } from './wishlists.service';
-import { AuthPublicUser, AuthUser, AuthUserId } from 'src/common/decorators';
+import { AuthPublicUser, AuthUserId } from 'src/common/decorators';
 import { CreateWishlistDto, UpdateWishlistDto } from './dto';
 import { UserId } from 'src/common/types';
-import { UserEntity } from '../entities.index';
 import { UserPublicProfileResponseDto } from '../users/dto';
 
 @ApiTags('Wishlists')
@@ -65,7 +64,10 @@ export class WishlistsController {
   @ApiParam({ name: 'id', example: '1' })
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number): Promise<WishlistEntity> {
-    return this.wishlistsService.findOne(id);
+    return this.wishlistsService.findOne({
+      where: { id },
+      relations: ['owner', 'items'],
+    });
   }
 
   // ======================================
@@ -81,7 +83,14 @@ export class WishlistsController {
     @AuthUserId() userId: UserId,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ): Promise<WishlistEntity> {
-    return this.wishlistsService.updateOne(id, userId, updateWishlistDto);
+    return this.wishlistsService.updateOne(
+      {
+        where: { id },
+        relations: ['owner'],
+      },
+      userId,
+      updateWishlistDto,
+    );
   }
 
   // ======================================
@@ -96,7 +105,13 @@ export class WishlistsController {
     @Param('id', ParseIntPipe) id: number,
     @AuthUserId() userId: UserId,
   ): Promise<WishlistEntity> {
-    return this.wishlistsService.removeOne(id, userId);
+    return this.wishlistsService.removeOne(
+      {
+        where: { id },
+        relations: ['owner'],
+      },
+      userId,
+    );
   }
 
   // ======================================

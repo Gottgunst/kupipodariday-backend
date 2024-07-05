@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WishEntity, WishlistEntity } from '../entities.index';
-import { In, Repository } from 'typeorm';
+import { FindOneOptions, In, Repository } from 'typeorm';
 import { CreateWishlistDto, UpdateWishlistDto } from './dto';
 import { UserPublicProfileResponseDto } from '../users/dto';
 import {
@@ -50,11 +50,8 @@ export class WishlistsService {
 
   // ======================================
 
-  async findOne(id: number): Promise<WishlistEntity> {
-    const wishlist = await this.wishlistsRepository.findOne({
-      where: { id },
-      relations: ['owner', 'items'],
-    });
+  async findOne(query: FindOneOptions): Promise<WishlistEntity> {
+    const wishlist = await this.wishlistsRepository.findOne(query);
 
     this.isExist(wishlist);
 
@@ -64,14 +61,11 @@ export class WishlistsService {
   // ======================================
 
   async updateOne(
-    id: number,
+    query: FindOneOptions,
     userId: UserId,
     updateWishlistDto: UpdateWishlistDto,
   ): Promise<WishlistEntity> {
-    const wishlist = await this.wishlistsRepository.findOne({
-      where: { id },
-      relations: ['owner'],
-    });
+    const wishlist = await this.wishlistsRepository.findOne(query);
 
     this.isExist(wishlist);
     this.isOwner(userId, wishlist.owner.id);
@@ -82,7 +76,7 @@ export class WishlistsService {
       where: { id: In(itemsId) },
     });
 
-    updateWishlist['id'] = id;
+    updateWishlist['id'] = wishlist.id;
     updateWishlist['items'] = itemsArray;
 
     return this.wishlistsRepository.save(updateWishlist);
@@ -90,11 +84,11 @@ export class WishlistsService {
 
   // ======================================
 
-  async removeOne(id: number, userId: number): Promise<WishlistEntity> {
-    const wishlist = await this.wishlistsRepository.findOne({
-      where: { id },
-      relations: ['owner'],
-    });
+  async removeOne(
+    query: FindOneOptions,
+    userId: number,
+  ): Promise<WishlistEntity> {
+    const wishlist = await this.wishlistsRepository.findOne(query);
 
     this.isExist(wishlist);
     this.isOwner(userId, wishlist.owner.id);

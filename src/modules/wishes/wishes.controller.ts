@@ -116,7 +116,14 @@ export class WishesController {
     @AuthUserId() userId: UserId,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    return this.wishesService.updateOne(id, userId, updateWishDto);
+    return this.wishesService.updateOne(
+      {
+        where: { id },
+        relations: ['owner', 'offers'],
+      },
+      userId,
+      updateWishDto,
+    );
   }
 
   // ======================================
@@ -128,7 +135,14 @@ export class WishesController {
   @ApiParam({ name: 'id', example: '1' })
   @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number, @AuthUserId() userId: UserId) {
-    return this.wishesService.deleteOne(id, userId);
+    return this.wishesService.deleteOne(
+      {
+        where: { id },
+        relations: ['owner'],
+        select: ['id', 'name', 'link', 'image', 'price', 'description'],
+      },
+      userId,
+    );
   }
 
   // ======================================
@@ -140,6 +154,22 @@ export class WishesController {
   @ApiParam({ name: 'id', example: '1' })
   @Post(':id/copy')
   copy(@AuthUser() user, @Param('id', ParseIntPipe) wishId: WishId) {
-    return this.wishesService.duplicateOne(wishId, user);
+    return this.wishesService.copyOne(
+      {
+        where: { id: wishId },
+        select: [
+          'id',
+          'name',
+          'link',
+          'image',
+          'price',
+          'description',
+          'copied',
+          'parentId',
+        ],
+        relations: ['owner'],
+      },
+      user,
+    );
   }
 }

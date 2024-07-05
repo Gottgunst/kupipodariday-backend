@@ -71,32 +71,25 @@ export class WishesService {
   // ======================================
 
   async updateOne(
-    wishId: WishId,
+    query: FindOneOptions,
     userId: UserId,
     updateWishDto: UpdateWishDto,
   ) {
-    const wish = await this.wishesRepository.findOne({
-      where: { id: wishId },
-      relations: ['owner', 'offers'],
-    });
+    const wish = await this.wishesRepository.findOne(query);
 
     this.isExist(wish);
     this.isOwner(wish.owner.id, userId);
     this.hasOffers(wish.offers, updateWishDto.price);
 
-    updateWishDto['id'] = wishId;
+    updateWishDto['id'] = wish.id;
 
     return await this.wishesRepository.save(updateWishDto);
   }
 
   // ======================================
 
-  async deleteOne(wishId: WishId, userId: UserId) {
-    const wish = await this.wishesRepository.findOne({
-      where: { id: wishId },
-      relations: ['owner'],
-      select: ['id', 'name', 'link', 'image', 'price', 'description'],
-    });
+  async deleteOne(query: FindOneOptions, userId: UserId) {
+    const wish = await this.wishesRepository.findOne(query);
 
     this.isExist(wish);
     this.isOwner(wish.owner.id, userId);
@@ -109,21 +102,8 @@ export class WishesService {
 
   // ======================================
 
-  async duplicateOne(wishId: WishId, user: UserEntity) {
-    const wish = await this.wishesRepository.findOne({
-      where: { id: wishId },
-      select: [
-        'id',
-        'name',
-        'link',
-        'image',
-        'price',
-        'description',
-        'copied',
-        'parentId',
-      ],
-      relations: ['owner'],
-    });
+  async copyOne(query: FindOneOptions, user: UserEntity) {
+    const wish = await this.wishesRepository.findOne(query);
     this.isExist(wish);
     const { id, copied, ...wishCopy } = wish; //eslint-disable-line
     let parentId = id;
@@ -176,12 +156,6 @@ export class WishesService {
   // async donate(wish: WishEntity, amount: number) {
   //   wish.raised += amount;
   //   return this.wishesRepository.save(wish);
-  // }
-
-  // ======================================
-
-  // findMany(query: FindManyOptions) {
-  //   return this.wishesRepository.find(query);
   // }
 
   // ======================================

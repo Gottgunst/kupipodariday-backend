@@ -63,7 +63,7 @@ export class UsersController {
     @AuthUserId() id: UserId,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {
-    return this.usersService.updateOne(id, updateUserDto);
+    return this.usersService.updateOneById(id, updateUserDto);
   }
 
   // ======================================
