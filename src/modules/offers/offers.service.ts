@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { OfferEntity, UserEntity } from '../entities.index';
+import { OfferEntity, UserEntity, WishEntity } from '../entities.index';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto';
-import { OfferIsDoubleException, OfferIsNotExistException } from './exceptions';
+import {
+  OfferIsDoubleException,
+  OfferIsNotExistException,
+  WishIsYoursException,
+} from './exceptions';
 import { isArray } from 'class-validator';
 
 @Injectable()
@@ -11,6 +15,8 @@ export class OffersService {
   constructor(
     @InjectRepository(OfferEntity)
     private offerRepository: Repository<OfferEntity>,
+    @InjectRepository(WishEntity)
+    private wishesRepository: Repository<WishEntity>,
   ) {}
 
   // ======================================
@@ -21,7 +27,14 @@ export class OffersService {
   ): Promise<OfferEntity> {
     const { itemId, ...newOffer } = createOfferDto; //eslint-disable-line
 
-    const isDouble = this.offerRepository.findOne({
+    const isWishOwner = await this.wishesRepository.findOne({
+      where: { id: itemId, owner: { id: user.id } },
+      relations: ['owner'],
+    });
+
+    if (isWishOwner) throw new WishIsYoursException();
+
+    const isDouble = await this.offerRepository.findOne({
       where: { item: { id: itemId }, user: { id: user.id } },
     });
 
