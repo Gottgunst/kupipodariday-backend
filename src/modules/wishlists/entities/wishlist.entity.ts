@@ -8,6 +8,7 @@ import {
   IsUrl,
   Length,
 } from 'class-validator';
+import { WishEntity } from 'src/modules/entities.index';
 import { UserPublicProfileResponseDto } from 'src/modules/users/dto/public-response-user.dto';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import { WishPartial } from 'src/modules/wishes/dto/response-wish.dto';
@@ -16,6 +17,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -48,7 +51,7 @@ export class WishlistEntity {
   })
   @IsEmpty()
   @CreateDateColumn()
-  updatedA: Date;
+  updatedAt: Date;
 
   // ======================================
 
@@ -90,6 +93,7 @@ export class WishlistEntity {
   @Column({
     type: 'varchar',
     length: 1500,
+    nullable: true,
   })
   description: string;
 
@@ -111,11 +115,8 @@ export class WishlistEntity {
     type: () => [WishPartial],
     description: 'Список желаний',
   })
-  @IsArray()
-  @Column({
-    type: 'simple-array',
-    default: [],
-  })
+  @ManyToMany(() => WishEntity, (wish) => wish.wishlists)
+  @JoinTable()
   items: WishPartial[];
 
   // ======================================
