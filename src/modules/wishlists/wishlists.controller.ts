@@ -23,10 +23,10 @@ import { CreateWishlistDto, UpdateWishlistDto } from './dto';
 import { UserId } from 'src/common/types';
 import { UserPublicProfileResponseDto } from '../users/dto';
 
-@ApiTags('Wishlists')
+@ApiTags('Wishlistlists')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('wishlists')
+@Controller('wishlistlists')
 export class WishlistsController {
   constructor(private wishlistsService: WishlistsService) {}
 

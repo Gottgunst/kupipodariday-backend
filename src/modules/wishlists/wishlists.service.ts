@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WishEntity, WishlistEntity } from '../entities.index';
+import { WishlistEntity } from '../entities.index';
 import { FindOneOptions, In, Repository } from 'typeorm';
 import { CreateWishlistDto, UpdateWishlistDto } from './dto';
 import { UserPublicProfileResponseDto } from '../users/dto';
@@ -9,14 +9,14 @@ import {
   WishlistIsNotExistException,
 } from './exceptions';
 import { UserId } from 'src/common/types';
+import { WishesService } from '../services.index';
 
 @Injectable()
 export class WishlistsService {
   constructor(
     @InjectRepository(WishlistEntity)
     private wishlistsRepository: Repository<WishlistEntity>,
-    @InjectRepository(WishEntity)
-    private wishesRepository: Repository<WishEntity>,
+    private wishesService: WishesService,
   ) {}
 
   // ======================================
@@ -27,7 +27,7 @@ export class WishlistsService {
   ): Promise<WishlistEntity> {
     const { itemsId, ...newWishlist } = createWishlistDto;
 
-    const itemsArray = await this.wishesRepository.find({
+    const itemsArray = await this.wishesService.findMany({
       where: { id: In(itemsId) },
     });
 
@@ -72,7 +72,7 @@ export class WishlistsService {
 
     const { itemsId, ...updateWishlist } = updateWishlistDto;
 
-    const itemsArray = await this.wishesRepository.find({
+    const itemsArray = await this.wishesService.findMany({
       where: { id: In(itemsId) },
     });
 

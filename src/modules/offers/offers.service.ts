@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { OfferEntity, UserEntity, WishEntity } from '../entities.index';
+import { OfferEntity, UserEntity} from '../entities.index';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto';
 import {
@@ -9,14 +9,14 @@ import {
   WishIsYoursException,
 } from './exceptions';
 import { isArray } from 'class-validator';
+import { WishesService } from '../services.index';
 
 @Injectable()
 export class OffersService {
   constructor(
     @InjectRepository(OfferEntity)
     private offerRepository: Repository<OfferEntity>,
-    @InjectRepository(WishEntity)
-    private wishesRepository: Repository<WishEntity>,
+    private wishesService: WishesService,
   ) {}
 
   // ======================================
@@ -27,12 +27,13 @@ export class OffersService {
   ): Promise<OfferEntity> {
     const { itemId, ...newOffer } = createOfferDto; //eslint-disable-line
 
-    const isWishOwner = await this.wishesRepository.findOne({
-      where: { id: itemId, owner: { id: user.id } },
+    const wish = await this.wishesService.findOne({
+      where: { id: itemId },
       relations: ['owner'],
     });
+    const { price, raised } = wish;
 
-    if (isWishOwner) throw new WishIsYoursException();
+    if (wish.owner.id === user.id) throw new WishIsYoursException();
 
     const isDouble = await this.offerRepository.findOne({
       where: { item: { id: itemId }, user: { id: user.id } },
@@ -40,11 +41,16 @@ export class OffersService {
 
     if (isDouble) throw new OfferIsDoubleException();
 
+    if (newOffer.amount > price - raised) {
+      newOffer.amount = price - raised;
+    }
+
     const offer = this.offerRepository.create({
       ...newOffer,
       user,
       item: { id: itemId },
     });
+    await this.wishesService.donate(wish, newOffer.amount);
 
     return await this.offerRepository.save(offer);
   }

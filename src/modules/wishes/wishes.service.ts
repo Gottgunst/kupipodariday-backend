@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { OfferEntity, UserEntity, WishEntity } from '../entities.index';
 import { CreateWishDto, UpdateWishDto } from './dto';
-import { UserId, WishId } from 'src/common/types';
+import { UserId } from 'src/common/types';
 import { UserIsNotOwnerException, WishIsNotExistException } from './exceptions';
 import { WishHasOffersException } from './exceptions/wish-has-offers.exception';
 import { UserPublicProfileResponseDto } from '../users/dto';
@@ -143,8 +143,11 @@ export class WishesService {
     if (offers.length > 0 && price) throw new WishHasOffersException();
   }
 
-  private isExist(wish: WishEntity | null): void {
+  private isExist(wish: WishEntity | WishEntity[] | null): void {
     if (!wish) throw new WishIsNotExistException();
+    if (Array.isArray(wish)) {
+      wish.map((w) => this.isExist(w));
+    }
   }
 
   private isOwner(wishOwnerId: UserId, userId: UserId): void {
@@ -153,11 +156,20 @@ export class WishesService {
 
   // ======================================
 
-  // async donate(wish: WishEntity, amount: number) {
-  //   wish.raised += amount;
-  //   return this.wishesRepository.save(wish);
-  // }
+  donate(wish: WishEntity, amount: number) {
+    wish.raised += amount;
+    return this.wishesRepository.save(wish);
+  }
 
+  // ======================================
+
+  async findMany(query: FindManyOptions) {
+    const wishes = await this.wishesRepository.find(query);
+
+    this.isExist(wishes);
+
+    return wishes;
+  }
   // ======================================
 
   // async findAll(query: {
