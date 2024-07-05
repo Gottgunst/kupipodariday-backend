@@ -6,6 +6,7 @@ import { CreateWishDto, UpdateWishDto } from './dto';
 import { UserId, WishId } from 'src/common/types';
 import { UserIsNotOwnerException, WishIsNotExistException } from './exceptions';
 import { WishHasOffersException } from './exceptions/wish-has-offers.exception';
+import { UserPublicProfileResponseDto } from '../users/dto';
 
 // #####################################
 // #####################################
@@ -22,7 +23,7 @@ export class WishesService {
 
   async create(
     createWishDto: CreateWishDto,
-    user: UserEntity,
+    user: UserPublicProfileResponseDto,
   ): Promise<WishEntity> {
     const wish = this.wishesRepository.create({
       ...createWishDto,
@@ -90,7 +91,7 @@ export class WishesService {
 
   // ======================================
 
-  async removeOne(wishId: WishId, userId: UserId) {
+  async deleteOne(wishId: WishId, userId: UserId) {
     const wish = await this.wishesRepository.findOne({
       where: { id: wishId },
       relations: ['owner'],

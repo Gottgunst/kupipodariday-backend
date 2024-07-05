@@ -59,11 +59,11 @@ export class UsersController {
   })
   @UseInterceptors(RemoveIdInterceptor)
   @Patch('me')
-  async updateSelf(
+  updateSelf(
     @AuthUserId() id: UserId,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {
-    return await this.usersService.updateOne(id, updateUserDto);
+    return this.usersService.updateOne(id, updateUserDto);
   }
 
   // ======================================
@@ -73,8 +73,8 @@ export class UsersController {
     type: [WishEntity],
   })
   @Get('me/wishes')
-  async findMyWishes(@AuthUserId() userId: UserId): Promise<WishEntity[]> {
-    return await this.usersService.findWishes('id', userId);
+  findMyWishes(@AuthUserId() userId: UserId): Promise<WishEntity[]> {
+    return this.usersService.findWishes('id', userId);
   }
 
   // ======================================
@@ -99,10 +99,10 @@ export class UsersController {
   })
   @ApiParam({ name: 'username', example: 'Wisher' })
   @Get(':username/wishes')
-  async findWishesById(
+  findWishesById(
     @Param('username') username: string,
   ): Promise<UserWishesDto[]> {
-    return await this.usersService.findWishes('username', username);
+    return this.usersService.findWishes('username', username);
   }
 
   // ======================================

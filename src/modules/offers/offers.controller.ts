@@ -69,7 +69,7 @@ export class OffersController {
   @ApiParam({ name: 'id', example: '1' })
   @Get(':id')
   findWishOffers(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<OfferEntity[]> {
     return this.offersService.findWishOffers({
       where: { item: { id, offers: { hidden: Not(true) } } },

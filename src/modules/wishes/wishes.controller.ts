@@ -10,7 +10,11 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthUser, AuthUserId } from 'src/common/decorators/user.decorator';
+import {
+  AuthPublicUser,
+  AuthUser,
+  AuthUserId,
+} from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import {
   ApiBearerAuth,
@@ -23,6 +27,7 @@ import { CreateWishDto, UpdateWishDto } from './dto';
 import { WishEntity } from '../entities.index';
 import { FilterWishOffersInterceptor } from './interceptions';
 import { UserId, WishId } from 'src/common/types';
+import { UserPublicProfileResponseDto } from '../users/dto';
 
 // #####################################
 // ############ PUBLIC #################
@@ -77,7 +82,7 @@ export class WishesController {
   })
   @Post()
   create(
-    @AuthUser() user,
+    @AuthPublicUser() user: UserPublicProfileResponseDto,
     @Body() createWishDto: CreateWishDto,
   ): Promise<WishEntity> {
     return this.wishesService.create(createWishDto, user);
@@ -91,13 +96,11 @@ export class WishesController {
   })
   @ApiParam({ name: 'id', example: '1' })
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    const wish = await this.wishesService.findOne({
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.wishesService.findOne({
       where: { id },
       relations: ['owner', 'offers'],
     });
-
-    return wish;
   }
 
   // ======================================
@@ -124,8 +127,8 @@ export class WishesController {
   })
   @ApiParam({ name: 'id', example: '1' })
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number, @AuthUserId() userId: UserId) {
-    return this.wishesService.removeOne(id, userId);
+  delete(@Param('id', ParseIntPipe) id: number, @AuthUserId() userId: UserId) {
+    return this.wishesService.deleteOne(id, userId);
   }
 
   // ======================================
