@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmpty, IsNumber, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsEmpty, IsNumber, Max, Min } from 'class-validator';
+import {
+  decimalTransformer,
+  roundFloatTransformer,
+} from 'src/helpers/entity.transformers';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import { WishEntity } from 'src/modules/wishes/entities/wish.entity';
 import {
@@ -50,9 +55,14 @@ export class OfferEntity {
   })
   @IsNumber()
   @Min(1)
+  @Max(99999999.99)
+  @Transform(roundFloatTransformer)
   @Column({
-    type: 'int',
-    default: 1,
+    type: 'decimal',
+    precision: 11,
+    scale: 2,
+    default: 0,
+    transformer: decimalTransformer,
   })
   amount: number;
 
