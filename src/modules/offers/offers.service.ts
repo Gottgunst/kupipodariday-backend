@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { OfferEntity, UserEntity} from '../entities.index';
+import { OfferEntity, UserEntity } from '../entities.index';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto';
 import {

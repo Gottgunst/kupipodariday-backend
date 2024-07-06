@@ -191,9 +191,7 @@ export class WishEntity {
   // ======================================
 
   @ApiProperty({
-    type: () => UserPublicProfileResponseDto,
-    default: [],
-    description: 'Создатель желания',
+    type: UserPublicProfileResponseDto,
   })
   @ManyToOne(() => UserEntity, (user) => user.wishes)
   @JoinColumn()
@@ -203,9 +201,7 @@ export class WishEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => [OfferEntity],
-    default: [],
-    description: 'Список складчины',
+    type: () => OfferEntity,
   })
   @OneToMany(() => OfferEntity, (offer) => offer.item)
   offers: OfferEntity[];
@@ -214,9 +210,7 @@ export class WishEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => [WishlistEntity],
-    default: [],
-    description: 'Списки желаний',
+    type: () => WishlistEntity,
   })
   @ManyToMany(() => WishlistEntity, (wishlist) => wishlist.items)
   wishlists: WishlistEntity[];

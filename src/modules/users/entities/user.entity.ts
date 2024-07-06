@@ -132,9 +132,7 @@ export class UserEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => [WishEntity],
-    default: [],
-    description: 'Подарки',
+    type: () => WishEntity,
   })
   @OneToMany(() => WishEntity, (wish) => wish.owner)
   wishes: WishEntity[];
@@ -143,9 +141,7 @@ export class UserEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => [OfferEntity],
-    default: [],
-    description: 'Складчина',
+    type: () => OfferEntity,
   })
   @OneToMany(() => OfferEntity, (offer) => offer.user)
   offers: OfferEntity[];
@@ -154,9 +150,7 @@ export class UserEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => [WishlistEntity],
-    default: [],
-    description: 'Списки желаний',
+    type: () => WishlistEntity,
   })
   @OneToMany(() => WishlistEntity, (wishlist) => wishlist.owner)
   wishlists: WishlistEntity[];

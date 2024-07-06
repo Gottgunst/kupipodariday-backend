@@ -68,11 +68,17 @@ export class OfferEntity {
 
   // ======================================
 
+  @ApiProperty({
+    type: UserEntity,
+  })
   @ManyToOne(() => UserEntity, (user) => user.offers)
   user: UserEntity;
 
   // ======================================
 
+  @ApiProperty({
+    type: WishEntity,
+  })
   @ManyToOne(() => WishEntity, (wish) => wish.offers)
   item: WishEntity;
 }

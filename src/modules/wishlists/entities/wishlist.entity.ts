@@ -100,9 +100,7 @@ export class WishlistEntity {
   // ======================================
 
   @ApiProperty({
-    description: 'Создатель списка желаний',
-    type: () => UserPublicProfileResponseDto,
-    default: [],
+    type: UserPublicProfileResponseDto,
   })
   @ManyToOne(() => UserEntity, (user) => user.wishlists)
   @JoinColumn()
@@ -112,8 +110,7 @@ export class WishlistEntity {
 
   @ApiProperty({
     isArray: true,
-    type: () => [WishPartial],
-    description: 'Список желаний',
+    type: () => WishPartial,
   })
   @ManyToMany(() => WishEntity, (wish) => wish.wishlists)
   @JoinTable()

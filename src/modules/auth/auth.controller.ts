@@ -36,7 +36,7 @@ export class AuthController {
 
   @ApiOkResponse({
     description: 'Создание пользователя',
-    type: () => SignUpUserResponseDto,
+    type: SignUpUserResponseDto,
   })
   @Post('signup')
   @UseFilters(UserOrEmailExistExceptionsFilter)
@@ -52,7 +52,7 @@ export class AuthController {
 
   @ApiOkResponse({
     description: 'Авторизация пользователя',
-    type: () => SignInUserResponseDto,
+    type: SignInUserResponseDto,
   })
   @ApiBearerAuth()
   @UseGuards(LocalAuthGuard)
