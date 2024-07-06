@@ -5,10 +5,12 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { configSwagger, routeSwagger } from './config/swagger-config';
 import helmet from 'helmet';
 import { CommonExceptionsFilter } from './common/filters';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const { httpAdapter } = app.get(HttpAdapterHost);
+  const configService = app.get(ConfigService);
 
   app.enableCors();
   app.use(helmet());
@@ -23,6 +25,6 @@ async function bootstrap() {
     { swaggerOptions: { persistAuthorization: true } },
   );
 
-  await app.listen(3000);
+  await app.listen(configService.get('server.port'));
 }
 bootstrap();
