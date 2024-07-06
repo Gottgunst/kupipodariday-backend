@@ -99,7 +99,7 @@ export class WishesController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.wishesService.findOne({
       where: { id },
-      relations: ['owner', 'offers'],
+      relations: ['owner', 'offers', 'offers.user'],
     });
   }
 

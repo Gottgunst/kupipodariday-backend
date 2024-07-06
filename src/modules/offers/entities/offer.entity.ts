@@ -3,6 +3,8 @@ import { IsBoolean, IsEmpty, IsNumber, Min } from 'class-validator';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import { WishEntity } from 'src/modules/wishes/entities/wish.entity';
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -13,7 +15,7 @@ import {
 @Entity()
 export class OfferEntity {
   @ApiProperty({
-    description: 'Идентификатор складчины',
+    description: 'Идентификатор вклада',
     example: 321,
   })
   @PrimaryGeneratedColumn()
@@ -23,7 +25,7 @@ export class OfferEntity {
   // ======================================
 
   @ApiProperty({
-    description: 'Дата создания складчины',
+    description: 'Дата создания вклада',
     example: '25.02.2022',
   })
   @IsEmpty()
@@ -33,7 +35,7 @@ export class OfferEntity {
   // ======================================
 
   @ApiProperty({
-    description: 'Дата изменения складчины',
+    description: 'Дата изменения вклада',
     example: '27.04.2024',
   })
   @IsEmpty()
@@ -43,7 +45,7 @@ export class OfferEntity {
   // ======================================
 
   @ApiProperty({
-    description: 'Количество людей в складчине',
+    description: 'Количество средств во вкладе',
     example: 1,
   })
   @IsNumber()
@@ -57,7 +59,7 @@ export class OfferEntity {
   // ======================================
 
   @ApiProperty({
-    description: 'Явное или тайное участие в складчине',
+    description: 'Явное или тайное участие во вкладе',
     example: false,
   })
   @IsBoolean()
@@ -76,9 +78,32 @@ export class OfferEntity {
 
   // ======================================
 
+  @BeforeInsert()
+  setCreatorName() {
+    this.name = this.user.username;
+  }
+
+  @BeforeUpdate()
+  setCreatorNameOnUpdate() {
+    if (!this.name && this.user) {
+      this.name = this.user.username;
+    }
+  }
+
+  @ApiProperty({
+    description: 'Имя мецената, автоматически соответствует создателю вклада',
+    type: UserEntity['username'],
+  })
+  @Column({ nullable: true })
+  name: string;
+
+  // ======================================
+
   @ApiProperty({
     type: WishEntity,
   })
   @ManyToOne(() => WishEntity, (wish) => wish.offers)
   item: WishEntity;
+
+  // ======================================
 }
