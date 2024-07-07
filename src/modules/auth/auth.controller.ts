@@ -38,14 +38,13 @@ export class AuthController {
     description: 'Создание пользователя',
     type: SignUpUserResponseDto,
   })
-  @Post('signup')
   @UseFilters(UserOrEmailExistExceptionsFilter)
   @UseInterceptors(RemovePasswordInterceptor)
-  async createUser(
+  @Post('signup')
+  createUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<SignUpUserResponseDto> {
-    const user = await this.userService.create(createUserDto);
-    return user;
+    return this.userService.create(createUserDto);
   }
 
   // ======================================
