@@ -7,6 +7,7 @@ import {
   UseGuards,
   Param,
   UseInterceptors,
+  UseFilters,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -27,6 +28,7 @@ import { WishEntity } from '../entities.index';
 import { RemoveIdInterceptor, RemovePasswordInterceptor } from './interceptors';
 import { UserId } from 'src/common/types';
 import { UserWishesDto } from '../wishes/dto';
+import { UserOrEmailExistExceptionsFilter } from 'src/common/filters';
 
 // #####################################
 // #####################################
@@ -57,6 +59,7 @@ export class UsersController {
     description: 'Правим данные текущего пользователя',
     type: UpdateUserDto,
   })
+  @UseFilters(UserOrEmailExistExceptionsFilter)
   @UseInterceptors(RemoveIdInterceptor)
   @Patch('me')
   updateSelf(

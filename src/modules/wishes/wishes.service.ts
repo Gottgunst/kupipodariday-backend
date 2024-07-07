@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import {
+  And,
+  DataSource,
+  FindManyOptions,
+  FindOneOptions,
+  Not,
+  Repository,
+} from 'typeorm';
 import { OfferEntity, UserEntity, WishEntity } from '../entities.index';
 import { CreateWishDto, UpdateWishDto } from './dto';
 import { UserId } from 'src/common/types';
-import { UserIsNotOwnerException, WishIsNotExistException } from './exceptions';
+import {
+  UserAlreadyHaveWishException,
+  UserIsNotOwnerException,
+  WishIsNotExistException,
+} from './exceptions';
 import { WishHasOffersException } from './exceptions/wish-has-offers.exception';
 import { UserPublicProfileResponseDto } from '../users/dto';
 
@@ -17,6 +28,7 @@ export class WishesService {
   constructor(
     @InjectRepository(WishEntity)
     private wishesRepository: Repository<WishEntity>,
+    private dataSource: DataSource,
   ) {}
 
   // ======================================
@@ -103,35 +115,79 @@ export class WishesService {
   // ======================================
 
   async copyOne(query: FindOneOptions, user: UserEntity) {
-    const wish = await this.wishesRepository.findOne(query);
-    this.isExist(wish);
-    const { id, copied, ...wishCopy } = wish; //eslint-disable-line
-    let parentId = id;
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    if (wish.parentId === 0) {
-      wish.copied++;
-    } else {
-      const parentWish = await this.wishesRepository.findOne({
-        where: { id: wish.parentId },
-        select: ['id', 'copied'],
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // ####################
+
+      const wish = await queryRunner.manager.findOne(WishEntity, query);
+      this.isExist(wish);
+
+      // ####################
+
+      const double = await queryRunner.manager.findOne(WishEntity, {
+        where: [
+          { owner: { id: user.id }, id: wish.id },
+          { owner: { id: user.id }, parentId: wish.id },
+          { owner: { id: user.id }, parentId: And(wish.parentId, Not(0)) },
+        ],
+        relations: ['owner'],
       });
 
-      if (!parentWish) {
-        wish.copied++;
-        wish.parentId = 0;
-      } else {
-        parentId = parentWish.id;
-        parentWish.copied++;
-        await this.wishesRepository.save(parentWish);
-      }
-    }
+      this.isDouble(double);
 
-    await this.wishesRepository.save(wish);
-    return this.wishesRepository.save({
-      ...wishCopy,
-      owner: user,
-      parentId,
-    });
+      // ####################
+
+      const { id, copied, ...wishCopy } = wish; //eslint-disable-line
+      let parentId = id;
+
+      if (wish.parentId === 0) {
+        wish.copied++;
+      } else {
+        const parentWish = await queryRunner.manager.findOne(WishEntity, {
+          where: { id: wish.parentId },
+          select: ['id', 'copied'],
+        });
+        if (!parentWish) {
+          wish.copied++;
+          wish.parentId = 0;
+        } else {
+          parentId = parentWish.id;
+          parentWish.copied++;
+          await queryRunner.manager.save(WishEntity, parentWish);
+        }
+      }
+      // ####################
+
+      await queryRunner.manager.save(WishEntity, wish);
+      const newWish = await queryRunner.manager.save(WishEntity, {
+        ...wishCopy,
+        owner: user,
+        parentId,
+      });
+
+      await queryRunner.commitTransaction();
+      return newWish;
+
+      // ####################
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // ======================================
+
+  async findMany(query: FindManyOptions) {
+    const wishes = await this.wishesRepository.find(query);
+
+    this.isExist(wishes);
+
+    return wishes;
   }
 
   // ======================================
@@ -150,26 +206,14 @@ export class WishesService {
     }
   }
 
+  private isDouble(wish: WishEntity | null): void {
+    if (wish) throw new UserAlreadyHaveWishException();
+  }
+
   private isOwner(wishOwnerId: UserId, userId: UserId): void {
     if (wishOwnerId !== userId) throw new UserIsNotOwnerException();
   }
 
-  // ======================================
-
-  donate(wish: WishEntity, amount: number) {
-    wish.raised += amount;
-    return this.wishesRepository.save(wish);
-  }
-
-  // ======================================
-
-  async findMany(query: FindManyOptions) {
-    const wishes = await this.wishesRepository.find(query);
-
-    this.isExist(wishes);
-
-    return wishes;
-  }
   // ======================================
 
   // async findAll(query: {

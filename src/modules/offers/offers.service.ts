@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { OfferEntity, UserEntity } from '../entities.index';
+import {
+  DataSource,
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
+import { OfferEntity, UserEntity, WishEntity } from '../entities.index';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto';
 import {
@@ -9,14 +14,13 @@ import {
   WishIsYoursException,
 } from './exceptions';
 import { isArray } from 'class-validator';
-import { WishesService } from '../services.index';
 
 @Injectable()
 export class OffersService {
   constructor(
     @InjectRepository(OfferEntity)
     private offerRepository: Repository<OfferEntity>,
-    private wishesService: WishesService,
+    private dataSource: DataSource,
   ) {}
 
   // ======================================
@@ -26,33 +30,56 @@ export class OffersService {
     createOfferDto: CreateOfferDto,
   ): Promise<OfferEntity> {
     const { itemId, ...newOffer } = createOfferDto; //eslint-disable-line
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    const wish = await this.wishesService.findOne({
-      where: { id: itemId },
-      relations: ['owner'],
-    });
-    const { price, raised } = wish;
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // ####################
 
-    if (wish.owner.id === user.id) throw new WishIsYoursException();
+      const wish = await queryRunner.manager.findOne(WishEntity, {
+        where: { id: itemId },
+        relations: ['owner'],
+      });
+      if (wish.owner.id === user.id) throw new WishIsYoursException();
 
-    const isDouble = await this.offerRepository.findOne({
-      where: { item: { id: itemId }, user: { id: user.id } },
-    });
+      // ####################
 
-    if (isDouble) throw new OfferIsDoubleException();
+      const isDouble = await queryRunner.manager.findOne(OfferEntity, {
+        where: { item: { id: itemId }, user: { id: user.id } },
+      });
+      if (isDouble) throw new OfferIsDoubleException();
 
-    if (newOffer.amount > price - raised) {
-      newOffer.amount = price - raised;
+      // ####################
+
+      const { price, raised } = wish;
+      if (newOffer.amount > price - raised) {
+        newOffer.amount = price - raised;
+      }
+      const offer = await queryRunner.manager.create(OfferEntity, {
+        ...newOffer,
+        user,
+        item: { id: itemId },
+      });
+      await queryRunner.manager.save(OfferEntity, offer);
+
+      // ####################
+
+      wish.raised += newOffer.amount;
+      await queryRunner.manager.save(WishEntity, wish);
+
+      // ####################
+
+      await queryRunner.commitTransaction();
+      return offer;
+
+      // ####################
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    const offer = this.offerRepository.create({
-      ...newOffer,
-      user,
-      item: { id: itemId },
-    });
-    await this.wishesService.donate(wish, newOffer.amount);
-
-    return await this.offerRepository.save(offer);
   }
   // ======================================
 

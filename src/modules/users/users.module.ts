@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule, WishesModule } from '../modules.index';
 import { UserEntity, WishEntity } from '../entities.index';
+import { UserOrEmailExistExceptionsFilter } from 'src/common/filters';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { UserEntity, WishEntity } from '../entities.index';
     forwardRef(() => WishesModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UserOrEmailExistExceptionsFilter],
   exports: [UsersService],
 })
 export class UsersModule {}
