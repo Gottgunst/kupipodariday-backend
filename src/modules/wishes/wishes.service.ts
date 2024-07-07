@@ -156,13 +156,6 @@ export class WishesService {
 
   // ======================================
 
-  donate(wish: WishEntity, amount: number) {
-    wish.raised += amount;
-    return this.wishesRepository.save(wish);
-  }
-
-  // ======================================
-
   async findMany(query: FindManyOptions) {
     const wishes = await this.wishesRepository.find(query);
 
@@ -170,6 +163,7 @@ export class WishesService {
 
     return wishes;
   }
+
   // ======================================
 
   // async findAll(query: {
